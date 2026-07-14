@@ -1,5 +1,7 @@
-# Workflow to build and deploy the Device Telemetry Service Docker image
-name: Build and Deploy Device Telemetry Service
+# This workflow builds the godezk_device_telemetry Docker image,
+# pushes it to Docker Hub, and updates the DevOps repo for Kubernetes deployment.
+# Required secrets: DOCKER_USERNAME, DOCKER_PASSWORD, DEVOPS_PAT
+name: Build and Deploy Telemetry Service
 
 # Trigger the workflow on push to specific branches or manual dispatch
 on:
@@ -7,13 +9,13 @@ on:
     branches:
       - main
       - dev
-      - staging
+      - stage
     # Trigger on relevant paths to avoid unnecessary builds
     paths:
       - 'services/telemetry/**'
       - 'Dockerfile'
       - 'package*.json'
-      - '.github/workflows/build-device-telemetry.yml'
+      - '.github/workflows/build-telemetry.yml'
   workflow_dispatch: # Allow manual trigger from GitHub UI
 
 # Global environment variables
