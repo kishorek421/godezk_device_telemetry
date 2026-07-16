@@ -1,7 +1,7 @@
-# This workflow builds the godezk_device_telemetry Docker image,
+# This workflow builds the godezk_device_telemetry_frontend Docker image,
 # pushes it to Docker Hub, and updates the DevOps repo for Kubernetes deployment.
 # Required secrets: DOCKER_USERNAME, DOCKER_PASSWORD, DEVOPS_PAT
-name: Build and Deploy Telemetry Service
+name: Build and Deploy Telemetry_Frontend Service
 
 # Trigger the workflow on push to specific branches or manual dispatch
 on:
@@ -12,15 +12,15 @@ on:
       - stage
     # Trigger on relevant paths to avoid unnecessary builds
     paths:
-      - 'services/telemetry/**'
+      - 'services/telemetry_frontend/**'
       - 'Dockerfile'
       - 'package*.json'
-      - '.github/workflows/build-telemetry.yml'
+      - '.github/workflows/build-telemetry_frontend.yml'
   workflow_dispatch: # Allow manual trigger from GitHub UI
 
 # Global environment variables
 env:
-  IMAGE_NAME: kishore2712/godezk_device_telemetry # Docker Hub image name
+  IMAGE_NAME: kishore2712/godezk_device_telemetry_frontend # Docker Hub image name
 
 jobs:
   # Single job to build and push Docker image
@@ -87,8 +87,8 @@ jobs:
         env:
           DEVOPS_PAT: ${{ secrets.DEVOPS_PAT }}
         run: |
-          git config --global user.email "ci@godezk-device-telemetry.com"
-          git config --global user.name "GoDezk Device Telemetry CI"
+          git config --global user.email "ci@godezk-device-telemetry_frontend.com"
+          git config --global user.name "GoDezk Device Telemetry_Frontend CI"
 
           git clone https://kishorek421:${DEVOPS_PAT}@github.com/kishorek421/godezk_device_devops.git devops
           cd devops
@@ -99,12 +99,12 @@ jobs:
           fi
           git checkout $BRANCH_NAME || git checkout -b $BRANCH_NAME
 
-          cd k8s/services/telemetry/overlays/$BRANCH_NAME
+          cd k8s/services/telemetry_frontend/overlays/$BRANCH_NAME
 
           SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
           sed -i "s|newTag:.*|newTag: ${{ steps.env.outputs.environment }}-${SHORT_SHA}|g" kustomization.yaml
 
           git add kustomization.yaml
-          git diff --staged --quiet || git commit -m "ci: update device-telemetry ${{ steps.env.outputs.environment }} image to ${SHORT_SHA}"
+          git diff --staged --quiet || git commit -m "ci: update device-telemetry_frontend ${{ steps.env.outputs.environment }} image to ${SHORT_SHA}"
           git pull --rebase origin $BRANCH_NAME
           git push origin $BRANCH_NAME
