@@ -1,6 +1,9 @@
-# Node dependencies
+# Dependency directories
 node_modules/
-client/node_modules/
+
+# Production builds
+dist/
+build/
 
 # Local environment configuration and secrets
 .env
@@ -8,10 +11,6 @@ client/node_modules/
 .env.development.local
 .env.test.local
 .env.production.local
-
-# Frontend production builds
-client/dist/
-client/build/
 
 # Debug and system files
 npm-debug.log*

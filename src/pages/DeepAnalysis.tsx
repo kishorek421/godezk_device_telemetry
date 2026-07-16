@@ -349,7 +349,7 @@ export const DeepAnalysis: React.FC = () => {
                   <td className="px-4 py-3 font-mono text-blue-600">{formatBytes(e.peakRss)}</td>
                   <td className="px-4 py-3 font-mono text-cyan-600">{formatBytes(e.heapUsed)}</td>
                   <td className="px-4 py-3 font-mono text-slate-200">{e.durationMs} ms</td>
-                  <td className="px-4 py-3 font-mono text-xs text-slate-350">{e.startedAt}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-slate-355">{e.startedAt}</td>
                 </tr>
               ))}
               {(heaviestExecutions || []).length === 0 && (
