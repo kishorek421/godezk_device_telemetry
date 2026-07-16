@@ -108,7 +108,6 @@ export const FrameDetails: React.FC = () => {
                       <span className="text-[10px] text-slate-350 font-mono">Started</span>
                     )}
 
-                    {/* CPU & Memory allocation details (Requested by user) */}
                     {(ev.cpu !== undefined || ev.memory !== undefined) && (
                       <div className="mt-3 pt-2 border-t border-slate-200 w-full flex flex-col gap-1 text-[9px] font-mono text-slate-300">
                         {ev.cpu && (

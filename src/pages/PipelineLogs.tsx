@@ -23,7 +23,6 @@ export const PipelineLogs: React.FC = () => {
           const existingMap = new Map(prevLogs.map(item => [item.id, item]));
           const merged = [...prevLogs];
           
-          // Loop from oldest to newest in the received batch
           for (let i = data.length - 1; i >= 0; i--) {
             const newItem = data[i];
             if (!existingMap.has(newItem.id)) {
@@ -32,7 +31,6 @@ export const PipelineLogs: React.FC = () => {
             }
           }
           
-          // Keep log tail bounded to 1000 lines
           if (merged.length > 1000) {
             return merged.slice(merged.length - 1000);
           }
@@ -226,7 +224,7 @@ export const PipelineLogs: React.FC = () => {
               className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${
                 activeFilter === filter 
                   ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/10' 
-                  : 'bg-slate-850 hover:bg-slate-800 text-slate-400 hover:text-slate-200'
+                  : 'bg-slate-850 hover:bg-slate-850 hover:text-slate-200'
               }`}
             >
               {filter}

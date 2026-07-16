@@ -98,7 +98,6 @@ export const Dashboard: React.FC = () => {
 
   // Helper to get sparkline data and percentage change
   const getTrendData = (trendArray: number[], currentVal: number) => {
-    // Fill up to 7 items if the trend array has fewer values
     let spark = [...trendArray];
     if (spark.length === 0) {
       spark = [currentVal, currentVal, currentVal, currentVal, currentVal, currentVal, currentVal];
@@ -106,10 +105,8 @@ export const Dashboard: React.FC = () => {
       const padding = Array(7 - spark.length).fill(spark[0] || 0);
       spark = [...padding, ...spark];
     }
-    // Make sure the last item matches the current value
     spark[spark.length - 1] = currentVal;
 
-    // Calculate percentage change compared to the average of previous values or previous value
     let change = '0.0%';
     let isUp = true;
     if (spark.length >= 2) {
