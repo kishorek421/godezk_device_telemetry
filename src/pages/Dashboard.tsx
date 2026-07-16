@@ -54,14 +54,17 @@ const SVGSparkline: React.FC<{ data: number[]; color: string }> = ({ data, color
 export const Dashboard: React.FC = () => {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchSummary = async (showLoading = true) => {
     if (showLoading) setLoading(true);
     try {
       const summary = await getDashboardSummary();
       setData(summary);
-    } catch (err) {
+      setError(null);
+    } catch (err: any) {
       console.error(err);
+      setError(err?.message || 'Failed to load dashboard data');
     } finally {
       if (showLoading) setLoading(false);
     }
@@ -71,11 +74,11 @@ export const Dashboard: React.FC = () => {
     fetchSummary(true);
     const interval = setInterval(() => {
       fetchSummary(false);
-    }, 2000);
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
-  if (loading || !data) {
+  if (loading) {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -92,6 +95,28 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
     );
+  }
+
+  if (error && !data) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+        <AlertTriangle className="w-16 h-16 text-amber-500" />
+        <h2 className="text-xl font-semibold text-slate-700">Unable to Load Dashboard</h2>
+        <p className="text-slate-500 text-center max-w-md">
+          {error}. Make sure the backdoor backend (port 8090) and telemetry proxy (port 3031) are running.
+        </p>
+        <button
+          onClick={() => fetchSummary(true)}
+          className="mt-4 px-6 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors font-medium"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return null;
   }
 
   const { stats, latencies, failures, journeys, throughput, queueTimeline, aiTrend } = data;

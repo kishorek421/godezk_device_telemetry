@@ -5,14 +5,17 @@ import { Cpu, Server } from 'lucide-react';
 export const WorkerAnalytics: React.FC = () => {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchSummary = async (showLoading = true) => {
     if (showLoading) setLoading(true);
     try {
       const res = await getDashboardSummary();
       setData(res);
-    } catch (err) {
+      setError(null);
+    } catch (err: any) {
       console.error(err);
+      setError(err?.message || 'Failed to load data');
     } finally {
       if (showLoading) setLoading(false);
     }
@@ -22,13 +25,24 @@ export const WorkerAnalytics: React.FC = () => {
     fetchSummary(true);
     const interval = setInterval(() => {
       fetchSummary(false);
-    }, 2000);
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
-  if (loading || !data) {
+  if (loading) {
     return <div className="text-slate-400 text-sm animate-pulse">Loading worker health tables...</div>;
   }
+
+  if (error && !data) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[40vh] gap-3">
+        <p className="text-slate-500">{error}</p>
+        <button onClick={() => fetchSummary(true)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Retry</button>
+      </div>
+    );
+  }
+
+  if (!data) return null;
 
   return (
     <div className="space-y-6">
