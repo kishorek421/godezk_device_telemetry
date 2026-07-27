@@ -12,7 +12,14 @@ on:
       - stage
     # Trigger on relevant paths to avoid unnecessary builds
     paths:
-      - 'services/telemetry_frontend/**'
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'server.js'
+      - 'vite.config.ts'
+      - 'tsconfig*.json'
+      - 'tailwind.config.js'
+      - 'postcss.config.js'
       - 'Dockerfile'
       - 'package*.json'
       - '.github/workflows/build-telemetry_frontend.yml'
