@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getDashboardSummary, DashboardData } from '../services/api';
-import { Video, SkipForward, CheckCircle2, AlertOctagon } from 'lucide-react';
+import { Video } from 'lucide-react';
 
 export const CameraAnalytics: React.FC = () => {
   const [data, setData] = useState<DashboardData | null>(null);

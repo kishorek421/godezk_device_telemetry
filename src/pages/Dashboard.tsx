@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   getDashboardSummary,
-  DashboardData,
-  Frame
+  DashboardData
 } from '../services/api';
 import {
   LineChart,
@@ -264,7 +263,7 @@ export const Dashboard: React.FC = () => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={latencyBreakdownData}>
                 <XAxis dataKey="name" stroke="#64748b" fontSize={10} tickLine={false} />
-                <YAxis stroke="#64748b" fontSize={9} tickLine={false} title="ms" />
+                <YAxis stroke="#64748b" fontSize={9} tickLine={false} />
                 <Tooltip formatter={(value) => [`${value} ms`]} contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: 12, color: '#1e293b' }} />
                 <Bar dataKey="ms" radius={[6, 6, 0, 0]}>
                   {latencyBreakdownData.map((entry, idx) => (

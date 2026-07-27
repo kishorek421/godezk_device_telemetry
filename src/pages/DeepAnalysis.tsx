@@ -5,7 +5,7 @@ import {
   ResponsiveContainer,
   AreaChart, Area,
   BarChart, Bar,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell
+  XAxis, YAxis, CartesianGrid, Tooltip, Cell
 } from 'recharts';
 
 const NODE_COLORS: Record<string, string> = {

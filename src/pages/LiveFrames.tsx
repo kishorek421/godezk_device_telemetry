@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getRecentFrames, Frame } from '../services/api';
-import { Video, Clock, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Video, Clock } from 'lucide-react';
 
 export const LiveFrames: React.FC = () => {
   const [frames, setFrames] = useState<Frame[]>([]);

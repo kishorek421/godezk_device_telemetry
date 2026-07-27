@@ -124,3 +124,22 @@ export const getDeepAnalysis = async () => {
   const res = await api.get('/api/deep-analysis');
   return res.data;
 };
+
+export interface BenchmarkBucket {
+  time_bucket: string;
+  frames: number;
+}
+
+export interface BenchmarkData {
+  success: boolean;
+  perMinute: BenchmarkBucket[];
+  perDay: BenchmarkBucket[];
+  perWeek: BenchmarkBucket[];
+  perMonth: BenchmarkBucket[];
+  generatedAt: string;
+}
+
+export const getBenchmark = async (): Promise<BenchmarkData> => {
+  const res = await api.get('/api/benchmark');
+  return res.data;
+};

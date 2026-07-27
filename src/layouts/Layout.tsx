@@ -9,7 +9,6 @@ import {
   Play,
   History,
   Settings,
-  ShieldAlert,
   ChevronLeft,
   ChevronRight,
   Search,
@@ -19,6 +18,7 @@ import {
   Sun,
   Moon,
   Terminal,
+  BarChart2,
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -48,6 +48,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, onRefresh }) => {
     { name: 'Recent Frames', path: '/recent', icon: History },
     { name: 'Pipeline Logs', path: '/logs', icon: Terminal },
     { name: 'Deep Analysis', path: '/deep-analysis', icon: Activity },
+    { name: 'Benchmark', path: '/benchmark', icon: BarChart2 },
     { name: 'Settings', path: '/settings', icon: Settings },
   ];
 

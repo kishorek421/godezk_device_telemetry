@@ -13,6 +13,7 @@ import { FrameDetails } from './pages/FrameDetails';
 import { PipelineLogs } from './pages/PipelineLogs';
 import { DeepAnalysis } from './pages/DeepAnalysis';
 import { Settings } from './pages/Settings';
+import { Benchmark } from './pages/Benchmark';
 
 const App: React.FC = () => {
   return (
@@ -30,6 +31,7 @@ const App: React.FC = () => {
           <Route path="/frame/:id" element={<FrameDetails />} />
           <Route path="/logs" element={<PipelineLogs />} />
           <Route path="/deep-analysis" element={<DeepAnalysis />} />
+          <Route path="/benchmark" element={<Benchmark />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </Layout>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getRecentFrames, Frame } from '../services/api';
-import { Search, Download, Filter } from 'lucide-react';
+import { Search, Download } from 'lucide-react';
 
 export const RecentFrames: React.FC = () => {
   const [frames, setFrames] = useState<Frame[]>([]);
