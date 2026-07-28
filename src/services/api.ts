@@ -6,14 +6,28 @@ const api = axios.create({
 
 export interface BenchmarkBucket {
   time_bucket: string;
-  frames: number;
+  executions: number;
 }
 
 export interface BenchmarkSummary {
-  frames_24h: number;
-  frames_7d: number;
-  frames_30d: number;
-  frames_total: number;
+  executions_24h: number;
+  executions_7d: number;
+  executions_30d: number;
+  executions_total: number;
+}
+
+export interface WorkflowSummary {
+  workflow_name: string;
+  executions: number;
+}
+
+export interface RecentExecution {
+  execution_id: string;
+  workflow_name: string;
+  trigger_event: string;
+  status: string;
+  started_at: string;
+  duration_ms: number | null;
 }
 
 export interface BenchmarkData {
@@ -23,6 +37,8 @@ export interface BenchmarkData {
   perWeek: BenchmarkBucket[];
   perMonth: BenchmarkBucket[];
   summary: BenchmarkSummary;
+  byWorkflow: WorkflowSummary[];
+  recent: RecentExecution[];
   generatedAt: string;
 }
 

@@ -5,7 +5,7 @@ import {
   BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip,
 } from 'recharts';
-import { Activity, Zap, CalendarDays, CalendarRange, Gauge, RefreshCw, Timer } from 'lucide-react';
+import { Activity, Zap, CalendarDays, CalendarRange, Gauge, RefreshCw, Timer, Workflow } from 'lucide-react';
 import { getBenchmark, BenchmarkData, BenchmarkBucket } from '../services/api';
 
 const REFRESH_INTERVAL_MS = 30000;
@@ -28,10 +28,20 @@ const ChartTooltip = ({ active, payload, label }: any) => {
     <div className="rounded-xl border border-white/10 bg-[#12172e]/95 px-4 py-3 shadow-2xl backdrop-blur">
       <p className="text-xs font-medium text-slate-400">{label}</p>
       <p className="mt-1 text-lg font-bold text-white">
-        {numberFmt(payload[0].value)} <span className="text-xs font-medium text-cyan-400">frames</span>
+        {numberFmt(payload[0].value)} <span className="text-xs font-medium text-cyan-400">executions</span>
       </p>
     </div>
   );
+};
+
+const statusColor = (status: string) => {
+  switch (status) {
+    case 'completed': return 'bg-emerald-400/15 text-emerald-300';
+    case 'partial':   return 'bg-amber-400/15 text-amber-300';
+    case 'failed':    return 'bg-red-400/15 text-red-300';
+    case 'running':   return 'bg-cyan-400/15 text-cyan-300';
+    default:          return 'bg-slate-500/15 text-slate-300';
+  }
 };
 
 interface StatCardProps {
@@ -108,16 +118,17 @@ export const Benchmark: React.FC = () => {
   }, [fetchData]);
 
   const peakPerMinute = data?.perMinute.length
-    ? Math.max(...data.perMinute.map((b) => b.frames))
+    ? Math.max(...data.perMinute.map((b) => b.executions))
     : 0;
 
   const mapChart = (rows: BenchmarkBucket[] | undefined, mode: 'minute' | 'day' | 'week' | 'month') =>
-    (rows ?? []).map((r) => ({ label: shortLabel(r.time_bucket, mode), frames: r.frames }));
+    (rows ?? []).map((r) => ({ label: shortLabel(r.time_bucket, mode), executions: r.executions }));
 
   const minuteData = mapChart(data?.perMinute, 'minute');
   const dayData = mapChart(data?.perDay, 'day');
   const weekData = mapChart(data?.perWeek, 'week');
   const monthData = mapChart(data?.perMonth, 'month');
+  const workflowData = (data?.byWorkflow ?? []).map((w) => ({ name: w.workflow_name, executions: w.executions }));
 
   if (loading) {
     return (
@@ -145,7 +156,7 @@ export const Benchmark: React.FC = () => {
                 Workflow Benchmark
               </h1>
               <p className="text-sm font-medium text-slate-400">
-                Frame execution throughput — live from workflow executions
+                Workflow executions per minute / day / week / month
               </p>
             </div>
           </div>
@@ -186,31 +197,31 @@ export const Benchmark: React.FC = () => {
           <StatCard
             icon={Activity}
             label="Last 24 Hours"
-            value={numberFmt(data?.summary?.frames_24h ?? 0)}
-            sub="frames executed"
+            value={numberFmt(data?.summary?.executions_24h ?? 0)}
+            sub="executions run"
             gradient="from-cyan-400 to-blue-500"
             glow="bg-cyan-400"
           />
           <StatCard
             icon={CalendarDays}
             label="Last 7 Days"
-            value={numberFmt(data?.summary?.frames_7d ?? 0)}
-            sub="frames executed"
+            value={numberFmt(data?.summary?.executions_7d ?? 0)}
+            sub="executions run"
             gradient="from-indigo-400 to-purple-500"
             glow="bg-indigo-400"
           />
           <StatCard
             icon={CalendarRange}
             label="Last 30 Days"
-            value={numberFmt(data?.summary?.frames_30d ?? 0)}
-            sub={`${numberFmt(data?.summary?.frames_total ?? 0)} all-time`}
+            value={numberFmt(data?.summary?.executions_30d ?? 0)}
+            sub={`${numberFmt(data?.summary?.executions_total ?? 0)} all-time`}
             gradient="from-emerald-400 to-teal-500"
             glow="bg-emerald-400"
           />
         </div>
 
         {/* Per minute — full width */}
-        <ChartCard title="Frames per Minute" badge="Last 24 hours" badgeColor="bg-cyan-500/15 text-cyan-300">
+        <ChartCard title="Executions per Minute" badge="Last 24 hours" badgeColor="bg-cyan-500/15 text-cyan-300">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={minuteData}>
               <defs>
@@ -223,14 +234,14 @@ export const Benchmark: React.FC = () => {
               <XAxis dataKey="label" stroke="#475569" fontSize={10} tickLine={false} axisLine={false} minTickGap={40} />
               <YAxis stroke="#475569" fontSize={10} tickLine={false} axisLine={false} width={40} />
               <Tooltip content={<ChartTooltip />} cursor={{ stroke: 'rgba(34,211,238,0.3)' }} />
-              <Area type="monotone" dataKey="frames" stroke="#22d3ee" strokeWidth={2.5} fill="url(#minuteFill)" dot={false} activeDot={{ r: 4, fill: '#22d3ee' }} />
+              <Area type="monotone" dataKey="executions" stroke="#22d3ee" strokeWidth={2.5} fill="url(#minuteFill)" dot={false} activeDot={{ r: 4, fill: '#22d3ee' }} />
             </AreaChart>
           </ResponsiveContainer>
         </ChartCard>
 
         {/* Day / Week / Month */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <ChartCard title="Frames per Day" badge="30 days" badgeColor="bg-indigo-500/15 text-indigo-300">
+          <ChartCard title="Executions per Day" badge="30 days" badgeColor="bg-indigo-500/15 text-indigo-300">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dayData}>
                 <defs>
@@ -243,12 +254,12 @@ export const Benchmark: React.FC = () => {
                 <XAxis dataKey="label" stroke="#475569" fontSize={10} tickLine={false} axisLine={false} minTickGap={20} />
                 <YAxis stroke="#475569" fontSize={10} tickLine={false} axisLine={false} width={36} />
                 <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(129,140,248,0.08)' }} />
-                <Bar dataKey="frames" fill="url(#dayFill)" radius={[6, 6, 0, 0]} maxBarSize={28} />
+                <Bar dataKey="executions" fill="url(#dayFill)" radius={[6, 6, 0, 0]} maxBarSize={28} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title="Frames per Week" badge="12 weeks" badgeColor="bg-purple-500/15 text-purple-300">
+          <ChartCard title="Executions per Week" badge="12 weeks" badgeColor="bg-purple-500/15 text-purple-300">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={weekData}>
                 <defs>
@@ -261,12 +272,12 @@ export const Benchmark: React.FC = () => {
                 <XAxis dataKey="label" stroke="#475569" fontSize={10} tickLine={false} axisLine={false} minTickGap={20} />
                 <YAxis stroke="#475569" fontSize={10} tickLine={false} axisLine={false} width={36} />
                 <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(192,132,252,0.08)' }} />
-                <Bar dataKey="frames" fill="url(#weekFill)" radius={[6, 6, 0, 0]} maxBarSize={36} />
+                <Bar dataKey="executions" fill="url(#weekFill)" radius={[6, 6, 0, 0]} maxBarSize={36} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title="Frames per Month" badge="12 months" badgeColor="bg-emerald-500/15 text-emerald-300">
+          <ChartCard title="Executions per Month" badge="12 months" badgeColor="bg-emerald-500/15 text-emerald-300">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthData}>
                 <defs>
@@ -279,14 +290,77 @@ export const Benchmark: React.FC = () => {
                 <XAxis dataKey="label" stroke="#475569" fontSize={10} tickLine={false} axisLine={false} minTickGap={20} />
                 <YAxis stroke="#475569" fontSize={10} tickLine={false} axisLine={false} width={36} />
                 <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(52,211,153,0.08)' }} />
-                <Bar dataKey="frames" fill="url(#monthFill)" radius={[6, 6, 0, 0]} maxBarSize={36} />
+                <Bar dataKey="executions" fill="url(#monthFill)" radius={[6, 6, 0, 0]} maxBarSize={36} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
         </div>
 
+        {/* Bottom: Top Workflows + Recent Executions */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <ChartCard title="Top Workflows" badge="Last 30 days" badgeColor="bg-pink-500/15 text-pink-300">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={workflowData} layout="vertical">
+                <defs>
+                  <linearGradient id="workflowFill" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#f472b6" />
+                    <stop offset="100%" stopColor="#db2777" />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid stroke="rgba(255,255,255,0.06)" horizontal={true} vertical={false} />
+                <XAxis type="number" stroke="#475569" fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis dataKey="name" type="category" stroke="#cbd5e1" fontSize={10} tickLine={false} axisLine={false} width={160} />
+                <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(244,114,182,0.08)' }} />
+                <Bar dataKey="executions" fill="url(#workflowFill)" radius={[0, 6, 6, 0]} maxBarSize={24} />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartCard>
+
+          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-sm font-bold tracking-wide text-white">Recent Executions</h2>
+              <span className="rounded-full bg-slate-500/15 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-300">
+                Last 25
+              </span>
+            </div>
+            <div className="max-h-64 overflow-auto pr-2">
+              <table className="w-full text-left text-xs">
+                <thead className="sticky top-0 bg-[#0a0e1f]/95 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                  <tr>
+                    <th className="pb-2 pt-1">Workflow</th>
+                    <th className="pb-2 pt-1">Trigger</th>
+                    <th className="pb-2 pt-1">Status</th>
+                    <th className="pb-2 pt-1 text-right">Time</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {(data?.recent ?? []).map((r) => (
+                    <tr key={r.execution_id} className="group hover:bg-white/[0.03]">
+                      <td className="py-2.5 font-medium text-slate-200">
+                        <div className="flex items-center gap-2">
+                          <Workflow size={12} className="text-slate-500" />
+                          <span className="max-w-[160px] truncate">{r.workflow_name}</span>
+                        </div>
+                      </td>
+                      <td className="py-2.5 text-slate-400">{r.trigger_event ?? '-'}</td>
+                      <td className="py-2.5">
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${statusColor(r.status)}`}>
+                          {r.status}
+                        </span>
+                      </td>
+                      <td className="py-2.5 text-right text-slate-500">
+                        {new Date(r.started_at).toLocaleTimeString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         <p className="pb-2 text-center text-[11px] font-medium text-slate-600">
-          Auto-refreshes every 30 seconds • Data sourced from workflow executions
+          Auto-refreshes every 30 seconds • Counts workflow execution rows in workflow_org_executions
         </p>
       </div>
     </div>
