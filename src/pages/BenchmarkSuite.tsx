@@ -98,6 +98,7 @@ function MetricPanel({ data }: { data: ComponentMetrics | undefined }) {
             {reliability?.dropped !== undefined && <StatRow label="Dropped" value={reliability.dropped} />}
             {reliability?.timeouts !== undefined && <StatRow label="Timeouts" value={reliability.timeouts} />}
             {reliability?.queueOverflow !== undefined && <StatRow label="Queue Overflow" value={reliability.queueOverflow} />}
+            {reliability?.activeCameras5m !== undefined && <StatRow label="Active Cameras (5m)" value={reliability.activeCameras5m} />}
             {queue && (
               <div className="pt-1 border-t border-slate-100 mt-1">
                 <StatRow label="Queue Size (now)" value={queue.currentSize ?? '—'} />

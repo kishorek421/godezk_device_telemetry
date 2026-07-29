@@ -79,6 +79,7 @@ export interface ReliabilityStats {
   dropped?: number;
   timeouts?: number;
   queueOverflow?: number;
+  activeCameras5m?: number;
 }
 
 export interface QueueStats {
