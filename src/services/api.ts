@@ -46,3 +46,63 @@ export const getBenchmark = async (): Promise<BenchmarkData> => {
   const res = await api.get('/api/benchmark');
   return res.data;
 };
+
+// ── Benchmark Suite (per-component) ───────────────────────────────
+export interface LatencyStats {
+  unit: 'ms';
+  avg: number;
+  p50: number;
+  p95: number;
+  p99: number;
+  count: number;
+  failed?: number;
+}
+
+export interface ThroughputStats {
+  unit: string; // executions | frames | inferences
+  perSecond?: number;
+  perMinute?: number;
+  total?: number;
+}
+
+export interface ResourceStats {
+  activeWorkers?: number;
+  cpuPct?: number;
+  rssMb?: number;
+  gpuUtil?: number;
+  gpuMemMb?: number;
+}
+
+export interface ReliabilityStats {
+  failures?: number;
+  retries?: number;
+  dropped?: number;
+  timeouts?: number;
+  queueOverflow?: number;
+}
+
+export interface QueueStats {
+  currentSize?: number;
+  avgSize?: number;
+  peakSize?: number;
+}
+
+export interface ComponentMetrics {
+  latency?: LatencyStats | null;
+  throughput?: ThroughputStats | null;
+  resource?: ResourceStats | null;
+  reliability?: ReliabilityStats | null;
+  queue?: QueueStats | null;
+}
+
+export interface BenchmarkSuiteData {
+  success: boolean;
+  window: { hours: number };
+  components: Record<string, ComponentMetrics>;
+  generatedAt: string;
+}
+
+export const getBenchmarkSuite = async (hours = 24): Promise<BenchmarkSuiteData> => {
+  const res = await api.get('/api/bench-suite', { params: { hours } });
+  return res.data;
+};
