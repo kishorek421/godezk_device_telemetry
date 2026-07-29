@@ -39,8 +39,8 @@ function StatRow({ label, value, unit, emphasize = false }: { label: string; val
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-sm">
-      <h3 className="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">{title}</h3>
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur">
+      <h3 className="text-xs font-semibold text-slate-300 mb-3 uppercase tracking-wider">{title}</h3>
       {children}
     </div>
   );
@@ -131,6 +131,7 @@ export const BenchmarkSuite: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [active, setActive] = useState<string>('Overall Pipeline');
   const [hours, setHours] = useState<number>(24);
+  const REFRESH_MS = 10000; // 10s for near real-time feel
 
   const refresh = async (h = hours) => {
     try {
@@ -147,8 +148,7 @@ export const BenchmarkSuite: React.FC = () => {
 
   useEffect(() => {
     refresh(24);
-    // auto-refresh every 30s
-    const id = setInterval(() => refresh(hours), 30000);
+    const id = setInterval(() => refresh(hours), REFRESH_MS);
     return () => clearInterval(id);
   }, []);
 
@@ -158,18 +158,18 @@ export const BenchmarkSuite: React.FC = () => {
   }, [data, active]);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="min-h-screen bg-[#0a0e1f] bg-[radial-gradient(ellipse_at_top,rgba(56,89,255,0.15),transparent_55%),radial-gradient(ellipse_at_bottom_right,rgba(34,211,238,0.08),transparent_50%)] px-6 py-8 lg:px-10 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-100 flex items-center gap-2"><BarChart2 size={18} className="text-cyan-500" /> Benchmark Suite</h1>
-          <p className="text-xs text-slate-300 mt-1">Window: last {data?.window.hours ?? hours}h • {data?.generatedAt ? new Date(data.generatedAt).toLocaleString() : ''}</p>
+          <h1 className="text-xl font-bold text-slate-100 flex items-center gap-2"><BarChart2 size={18} className="text-cyan-400" /> Benchmark Suite</h1>
+          <p className="text-xs text-slate-400 mt-1">Window: last {data?.window.hours ?? hours}h • {data?.generatedAt ? new Date(data.generatedAt).toLocaleString() : ''}</p>
         </div>
         <div className="flex items-center gap-2">
           <select
             value={hours}
-            onChange={(e) => setHours(Number(e.target.value))}
-            className="bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-3 text-xs text-slate-600 focus:outline-none focus:border-cyan-500"
+            onChange={(e) => { const v = Number(e.target.value); setHours(v); refresh(v); }}
+            className="bg-[#0f1326] border border-white/10 rounded-lg py-1.5 px-3 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"
             title="Select time window"
           >
             {[6, 12, 24, 48, 72].map((h) => (
@@ -177,7 +177,7 @@ export const BenchmarkSuite: React.FC = () => {
             ))}
           </select>
           <button
-            className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs shadow-sm hover:bg-slate-50"
+            className="px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-cyan-500 text-white text-xs font-semibold shadow-lg shadow-indigo-500/20 hover:brightness-110"
             onClick={() => refresh(hours)}
           >
             Refresh
@@ -189,7 +189,7 @@ export const BenchmarkSuite: React.FC = () => {
       <div className="flex flex-col md:flex-row gap-6">
         {/* Left vertical tabs */}
         <aside className="md:w-64 w-full md:shrink-0">
-          <div className="bg-white border border-slate-200/60 rounded-2xl p-3 shadow-sm md:sticky md:top-6 max-h-[70vh] md:max-h-[calc(100vh-160px)] overflow-y-auto">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3 backdrop-blur md:sticky md:top-6 max-h-[70vh] md:max-h-[calc(100vh-160px)] overflow-y-auto">
             <div className="flex md:flex-col flex-row flex-wrap gap-2">
               {COMPONENT_TABS.map((tab) => {
                 const isActive = active === tab;
@@ -197,7 +197,7 @@ export const BenchmarkSuite: React.FC = () => {
                   <button
                     key={tab}
                     onClick={() => setActive(tab)}
-                    className={`w-full md:w-full px-3 py-2 rounded-lg text-xs border text-left whitespace-normal break-words leading-snug transition-all ${isActive ? 'bg-cyan-600 text-white border-cyan-600' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}
+                    className={`w-full md:w-full px-3 py-2 rounded-lg text-xs border text-left whitespace-normal break-words leading-snug transition-all ${isActive ? 'bg-cyan-600 text-white border-cyan-500' : 'bg-white/[0.06] border-white/10 text-slate-200 hover:bg-white/[0.08]'}`}
                     title={tab}
                   >
                     {tab}
@@ -212,17 +212,17 @@ export const BenchmarkSuite: React.FC = () => {
         <section className="flex-1 space-y-6">
           {/* Body */}
           {loading ? (
-            <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-sm text-slate-600 text-xs">Loading benchmark suite...</div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur text-slate-300 text-xs">Loading benchmark suite...</div>
           ) : error ? (
-            <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-sm text-rose-600 text-xs">{error}</div>
+            <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-5 text-rose-200 text-xs">{error}</div>
           ) : (
             <MetricPanel data={compMetrics} />
           )}
 
           {/* Success Criteria scaffold */}
-          <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-sm">
-            <h3 className="text-xs font-semibold text-slate-700 mb-3 uppercase tracking-wider">Success Criteria (Targets)</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-slate-700">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur">
+            <h3 className="text-xs font-semibold text-slate-300 mb-3 uppercase tracking-wider">Success Criteria (Targets)</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-slate-200">
               <div className="flex items-center gap-2"><Gauge size={14} className="text-emerald-500" /> <span>End-to-End Latency &lt; 500 ms</span></div>
               <div className="flex items-center gap-2"><Activity size={14} className="text-indigo-500" /> <span>Inference Time &lt; 200 ms</span></div>
               <div className="flex items-center gap-2"><Cpu size={14} className="text-amber-500" /> <span>Worker CPU &lt; 70%</span></div>
