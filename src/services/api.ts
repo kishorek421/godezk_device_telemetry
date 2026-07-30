@@ -2,32 +2,132 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: '',
+  timeout: 30000,
 });
+
+export interface FrameEvent {
+  stage: string;
+  time?: string;
+  duration: number;
+  cpu?: string;
+  memory?: string;
+}
+
+export interface Frame {
+  frameId: string;
+  cameraId: string;
+  pipeline: string;
+  aiService: string;
+  workflow: string;
+  workerId: string;
+  confidence: number;
+  status: 'Completed' | 'Skipped' | 'Failed' | 'Processing';
+  detection: string;
+  receivedAt: string;
+  completedAt?: string;
+  totalTime: number;
+  error?: string;
+  events?: FrameEvent[];
+}
+
+export interface KPIStats {
+  receivedToday: number;
+  completed: number;
+  skipped: number;
+  failed: number;
+  avgProcessTime: number;
+  avgAiTime: number;
+  activeWorkers: number;
+  queueLength: number;
+}
+
+export interface LatencyBreakdown {
+  avg_weir: number;
+  avg_screener: number;
+  avg_decision: number;
+  avg_duration: number;
+}
+
+export interface DashboardData {
+  stats: KPIStats;
+  latencies: LatencyBreakdown;
+  failures: any[];
+  journeys: any[];
+  throughput: any[];
+  cameras: any[];
+  workers: any[];
+  models: any[];
+  workflows: any[];
+  queueTimeline?: any[];
+  aiTrend?: any[];
+  confidenceTrend?: any[];
+}
+
+export const getDashboardSummary = async (): Promise<DashboardData> => {
+  const res = await api.get('/api/dashboard-summary');
+  return res.data;
+};
+
+export const getFrameDetails = async (id: string): Promise<Frame> => {
+  const res = await api.get(`/api/frame/${id}`);
+  return res.data;
+};
+
+export const getRecentFrames = async (): Promise<Frame[]> => {
+  const res = await api.get('/api/frames');
+  return res.data;
+};
+
+export const getCameraAnalytics = async (cameraId: string) => {
+  const res = await api.get(`/api/camera/${cameraId}`);
+  return res.data;
+};
+
+export const getWorkerAnalytics = async () => {
+  const res = await api.get('/api/workers');
+  return res.data;
+};
+
+export interface LogLine {
+  id: string;
+  timestamp: string;
+  level: 'INFO' | 'SUCCESS' | 'ERROR';
+  layer: string;
+  message: string;
+}
+
+export const getPipelineLogs = async (days?: number, limit?: number): Promise<LogLine[]> => {
+  const params: Record<string, any> = {};
+  if (days !== undefined && days !== null) params.days = days;
+  if (limit !== undefined && limit !== null) params.limit = limit;
+  const res = await api.get('/api/pipeline-logs', { params });
+  return res.data;
+};
+
+export interface TelemetrySettings {
+  logLevel: string;
+  retention: string;
+  alerts: boolean;
+}
+
+export const getTelemetrySettings = async (): Promise<TelemetrySettings> => {
+  const res = await api.get('/api/settings');
+  return res.data.settings;
+};
+
+export const saveTelemetrySettings = async (settings: TelemetrySettings): Promise<TelemetrySettings> => {
+  const res = await api.post('/api/settings', settings);
+  return res.data.settings;
+};
+
+export const getDeepAnalysis = async () => {
+  const res = await api.get('/api/deep-analysis');
+  return res.data;
+};
 
 export interface BenchmarkBucket {
   time_bucket: string;
-  executions: number;
-}
-
-export interface BenchmarkSummary {
-  executions_24h: number;
-  executions_7d: number;
-  executions_30d: number;
-  executions_total: number;
-}
-
-export interface WorkflowSummary {
-  workflow_name: string;
-  executions: number;
-}
-
-export interface RecentExecution {
-  execution_id: string;
-  workflow_name: string;
-  trigger_event: string;
-  status: string;
-  started_at: string;
-  duration_ms: number | null;
+  frames: number;
 }
 
 export interface BenchmarkData {
@@ -36,74 +136,10 @@ export interface BenchmarkData {
   perDay: BenchmarkBucket[];
   perWeek: BenchmarkBucket[];
   perMonth: BenchmarkBucket[];
-  summary: BenchmarkSummary;
-  byWorkflow: WorkflowSummary[];
-  recent: RecentExecution[];
   generatedAt: string;
 }
 
 export const getBenchmark = async (): Promise<BenchmarkData> => {
   const res = await api.get('/api/benchmark');
-  return res.data;
-};
-
-// ── Benchmark Suite (per-component) ───────────────────────────────
-export interface LatencyStats {
-  unit: 'ms';
-  avg: number;
-  p50: number;
-  p95: number;
-  p99: number;
-  count: number;
-  failed?: number;
-}
-
-export interface ThroughputStats {
-  unit: string; // executions | frames | inferences
-  perSecond?: number;
-  perMinute?: number;
-  total?: number;
-}
-
-export interface ResourceStats {
-  activeWorkers?: number;
-  cpuPct?: number;
-  rssMb?: number;
-  gpuUtil?: number;
-  gpuMemMb?: number;
-}
-
-export interface ReliabilityStats {
-  failures?: number;
-  retries?: number;
-  dropped?: number;
-  timeouts?: number;
-  queueOverflow?: number;
-  activeCameras5m?: number;
-}
-
-export interface QueueStats {
-  currentSize?: number;
-  avgSize?: number;
-  peakSize?: number;
-}
-
-export interface ComponentMetrics {
-  latency?: LatencyStats | null;
-  throughput?: ThroughputStats | null;
-  resource?: ResourceStats | null;
-  reliability?: ReliabilityStats | null;
-  queue?: QueueStats | null;
-}
-
-export interface BenchmarkSuiteData {
-  success: boolean;
-  window: { hours: number };
-  components: Record<string, ComponentMetrics>;
-  generatedAt: string;
-}
-
-export const getBenchmarkSuite = async (hours = 24): Promise<BenchmarkSuiteData> => {
-  const res = await api.get('/api/bench-suite', { params: { hours } });
   return res.data;
 };
